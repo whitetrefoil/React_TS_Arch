@@ -3,7 +3,9 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.awcache" />
       <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/test_results" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

@@ -1,11 +1,10 @@
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin'
 import * as LodashPlugin from 'lodash-webpack-plugin'
 import * as webpack from 'webpack'
-import { WebpackBundleSizeAnalyzerPlugin } from 'webpack-bundle-size-analyzer'
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import { config, initialize } from '../config'
 import { entries } from './configs/entries'
 import { htmlWebpackPlugin } from './configs/html-webpack-plugin'
-import { sassLoader, scssLoader } from './configs/sass'
 
 if (config.isInitialized !== true) {
   initialize()
@@ -35,38 +34,30 @@ const prodConfig: webpack.Configuration = {
     rules: [
       {
         test: /\.tsx?$/,
+        exclude: /node_modules/,
         use: [
-          'babel-loader',
-          'awesome-typescript-loader?configFileName=tsconfig.json&failOnHint',
+          'awesome-typescript-loader?failOnHint',
         ],
       },
       {
         test: /\.jsx?$/,
+        exclude: /node_modules/,
         use: ['babel-loader'],
       },
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
-          use: ['css-loader?minimize&safe'],
-        }),
-      },
-      {
-        test: /\.sass$/,
-        use: ExtractTextPlugin.extract({
           use: [
-            'css-loader?minimize&safe',
-            'resolve-url-loader?keepQuery',
-            sassLoader,
+            'css-loader?minimize&safe&camelCase&importLoaders=2',
           ],
         }),
       },
       {
-        test: /\.scss$/,
+        test: /\.less/,
         use: ExtractTextPlugin.extract({
           use: [
-            'css-loader?minimize&safe',
-            'resolve-url-loader?keepQuery',
-            scssLoader,
+            'css-loader?minimize&safe&camelCase&importLoaders=1',
+            'less-loader?sourceMap&noIeCompat',
           ],
         }),
       },
@@ -112,7 +103,12 @@ const prodConfig: webpack.Configuration = {
       names: ['index', 'vendor', 'polyfills'],
     }),
     htmlWebpackPlugin,
-    new WebpackBundleSizeAnalyzerPlugin('../test_results/size-report.txt'),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      defaultSizes: 'gzip',
+      openAnalyzer: false,
+      reportFilename: '../test_results/bundle-analysis-report.html',
+    }),
     new webpack.optimize.UglifyJsPlugin(),
     new ExtractTextPlugin({
       filename: 'css/[name]-[contenthash].css',

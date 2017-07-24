@@ -3,7 +3,6 @@ import * as webpack from 'webpack'
 import { config, initialize } from '../config'
 import { entries } from './configs/entries'
 import { htmlWebpackPlugin } from './configs/html-webpack-plugin'
-import { sassLoader, scssLoader } from './configs/sass'
 
 if (config.isInitialized !== true) {
   initialize()
@@ -51,37 +50,29 @@ const devConfig: webpack.Configuration = {
       },
       {
         test: /\.tsx?$/,
+        exclude: /node_modules/,
         use: [
           'awesome-typescript-loader',
         ],
       },
       {
         test: /\.jsx?$/,
-        use: ['babel-loader'],
+        exclude: /node_modules/,
+        use: ['babel-loader?cacheDirectory'],
       },
       {
         test: /\.css$/,
         use: [
           'style-loader',
-          'css-loader?sourceMap&modules&camelCase',
+          'css-loader?sourceMap&camelCase',
         ],
       },
       {
-        test: /\.sass$/,
+        test: /\.less/,
         use: [
           'style-loader',
-          'css-loader?sourceMap&modules&camelCase&importLoaders=2',
-          'resolve-url-loader?sourceMap',
-          sassLoader,
-        ],
-      },
-      {
-        test: /\.scss$/,
-        use: [
-          'vue-style-loader',
-          'css-loader?sourceMap&modules&camelCase&importLoaders=2',
-          'resolve-url-loader?sourceMap',
-          scssLoader,
+          'css-loader?sourceMap&camelCase&importLoaders=1',
+          'less-loader?sourceMap&noIeCompat',
         ],
       },
       {
