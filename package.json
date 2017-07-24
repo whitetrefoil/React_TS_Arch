@@ -1,0 +1,143 @@
+{
+  "name": "react-arch",
+  "version": "0.1.0-alpha.1",
+  "main": "src/entry.js",
+  "author": "WhiteTrefoil <whitetrefoil@gmail.com>",
+  "private": true,
+  "license": "UNLICENSE",
+  "scripts": {
+    "build": "ts-node --no-cache -P dev/tsconfig.json dev/build",
+    "start": "ts-node --no-cache -P dev/tsconfig.json dev/dev-server",
+    "serve": "ts-node --no-cache -P dev/tsconfig.json dev/dev-server -d",
+    "test": "rimraf test_results && jest --no-cache --no-coverage",
+    "coverage": "rimraf test_results && jest --no-cache"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "babel-polyfill": "^6.23.0",
+    "bootstrap": "^4.0.0-alpha.6",
+    "debug": "^2.6.8",
+    "immutable": "^3.8.1",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "redux": "^3.7.2",
+    "redux-saga": "^0.15.5"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.16.4",
+    "@types/chalk": "^0.4.31",
+    "@types/connect": "^3.4.30",
+    "@types/del": "^2.2.32",
+    "@types/extract-text-webpack-plugin": "^2.1.0",
+    "@types/fs-extra": "^4.0.0",
+    "@types/html-webpack-plugin": "^2.28.0",
+    "@types/http-proxy": "^1.12.0",
+    "@types/jest": "^20.0.4",
+    "@types/lodash": "^4.14.71",
+    "@types/lodash-webpack-plugin": "^0.11.1",
+    "@types/meow": "^3.6.2",
+    "@types/node": "^8.0.15",
+    "@types/react": "^15.0.38",
+    "@types/react-dom": "^15.5.1",
+    "@types/serve-static": "^1.7.31",
+    "@types/webpack": "^3.0.5",
+    "@types/webpack-dev-server": "^2.4.0",
+    "awesome-typescript-loader": "^3.2.1",
+    "babel-core": "^6.25.0",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.1.1",
+    "babel-plugin-lodash": "^3.2.11",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "babel-preset-env": "^1.6.0",
+    "body-parser": "^1.17.2",
+    "chalk": "^2.0.1",
+    "clear-require": "^2.0.0",
+    "connect": "^3.6.2",
+    "core-js": "^2.4.1",
+    "cross-env": "^5.0.1",
+    "css-loader": "^0.28.4",
+    "del": "^3.0.0",
+    "eslint": "^4.3.0",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-html": "^3.1.1",
+    "eslint-plugin-react": "^7.1.0",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^0.11.2",
+    "html-loader": "^0.4.5",
+    "html-webpack-plugin": "^2.29.0",
+    "http-proxy": "^1.16.2",
+    "jest": "^20.0.4",
+    "lodash-webpack-plugin": "^0.11.4",
+    "meow": "^3.7.0",
+    "merge-stream": "^1.0.1",
+    "mock-server-middleware": "^0.2.0-alpha.3",
+    "mockjs": "^1.0.1-beta3",
+    "node-sass": "^4.5.3",
+    "pug": "^2.0.0-rc.2",
+    "pug-loader": "^2.3.0",
+    "raw-loader": "^0.5.1",
+    "resolve-url-loader": "^2.1.0",
+    "rimraf": "^2.6.1",
+    "run-sequence": "^2.0.0",
+    "sass-loader": "^6.0.6",
+    "serve-static": "^1.12.3",
+    "source-map-loader": "^0.2.1",
+    "style-loader": "^0.18.2",
+    "time-stamp": "^2.0.0",
+    "ts-jest": "^20.0.7",
+    "ts-node": "^3.2.1",
+    "tslint": "^5.5.0",
+    "tslint-loader": "^3.5.3",
+    "tslint-react": "^3.0.0",
+    "typescript": "^2.4.2",
+    "url-loader": "^0.5.9",
+    "webpack": "^3.3.0",
+    "webpack-bundle-size-analyzer": "^2.7.0",
+    "webpack-dev-server": "^2.6.1"
+  },
+  "engines": {
+    "node": ">=8.2.1",
+    "npm": ">=5.3.0"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx,js,jsx}",
+      "!**/*.d.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/~.*"
+    ],
+    "coverageDirectory": "test_results",
+    "coverageReporters": [
+      "clover",
+      "lcov",
+      "text-summary"
+    ],
+    "globals": {
+      "ts-jest": {
+        "skipBabel": false
+      }
+    },
+    "mapCoverage": true,
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json",
+      "ts",
+      "tsx"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/tests/file-mock.js",
+      "\\.(css|less|sass|scss)$": "<rootDir>/tests/style-mock.js"
+    },
+    "setupFiles": [
+      "babel-polyfill/lib/index.js"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
+    "transform": {
+      ".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    }
+  }
+}
