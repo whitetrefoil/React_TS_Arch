@@ -11,3 +11,5 @@ export class About extends React.Component<RouteComponentProps<any>> {
     )
   }
 }
+
+export default About

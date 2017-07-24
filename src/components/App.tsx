@@ -1,12 +1,13 @@
 import Layout from 'antd/lib/layout'
 import React from 'react'
 import { HashRouter as Router, Route } from 'react-router-dom'
-import { About } from './About'
+import asyncComponent from '../helpers/async-component'
 import * as c from './App.less'
 import { AppHeader } from './AppHeader'
 import { Generator } from './Generator'
 
-const { Header, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout
+const About = asyncComponent(() => import(/* webpackChunkName: "about" */'./About'))
 
 interface AppState {
   selectedKeys: string[]
@@ -43,3 +44,5 @@ export class App extends React.Component {
     )
   }
 }
+
+export default App

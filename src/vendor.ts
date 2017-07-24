@@ -1,3 +1,4 @@
+// tslint:disable:no-import-side-effect
 import 'axios'
 import 'immutable'
 import 'react'

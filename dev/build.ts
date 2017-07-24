@@ -27,7 +27,9 @@ async function startBuilding() {
 
   webpack(webpackConfig, async(err: Error, stats: any) => {
     if (err != null) { return deferred.reject(err) }
-    logger.log('[webpack]:\n', stats.toString('minimal'))
+    logger.log('[webpack]:\n', stats.toString({
+      modules: false,
+    }))
     await copyDataFiles()
     logger.log('Done!')
     deferred.resolve()

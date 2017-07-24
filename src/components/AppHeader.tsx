@@ -30,3 +30,5 @@ export class AppHeader extends React.Component<RouteComponentProps<any>> {
     )
   }
 }
+
+export default AppHeader

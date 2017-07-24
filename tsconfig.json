@@ -4,7 +4,7 @@
     "allowSyntheticDefaultImports"  : true,
     "target"                        : "es2017",
     "lib"                           : ["es2017", "es7", "dom"],
-    "module"                        : "es6",
+    "module"                        : "esnext",
     "moduleResolution"              : "node",
     "jsx"                           : "react",
     "inlineSources"                 : true,
@@ -13,7 +13,7 @@
     "sourceMap"                     : true,
     "emitDecoratorMetadata"         : true,
     "experimentalDecorators"        : true,
-    "removeComments"                : true,
+    "removeComments"                : false,
     "noImplicitAny"                 : true,
     "suppressImplicitAnyIndexErrors": true
   },
