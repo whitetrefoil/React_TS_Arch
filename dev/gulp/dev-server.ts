@@ -1,6 +1,5 @@
 import log              from 'fancy-log';
 import gulp             from 'gulp';
-import * as _           from 'lodash';
 import webpack          from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import config           from '../config';
@@ -36,7 +35,7 @@ gulp.task('devServer', done => {
     },
     proxy             : [
       {
-        context: _.map(config.apiPrefixes, (p: string): string => `${p}**`),
+        context: config.apiPrefixes.map((p: string): string => `${p}**`),
         target : `http://0.0.0.0:${config.serverPort + 1}`,
         secure : false,
       },
