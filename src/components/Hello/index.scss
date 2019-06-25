@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+:local {
+  .hello {
+    background-color: pink;
+    font-size: 150%;
+
+    p {
+      color: #333333;
+    }
+
+    input::placeholder {
+      color: #666666;
+    }
+
+    .image {
+      width: 160px;
+      height: 160px;
+      background: no-repeat center center url("cat.jpg");
+      background-size: 160px 160px;
+    }
+  }
+}

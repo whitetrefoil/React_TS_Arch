@@ -1,112 +1,210 @@
-import * as LodashPlugin from 'lodash-webpack-plugin'
-import * as webpack from 'webpack'
-import { config, initialize } from '../config'
-import { entries } from './configs/entries'
-import { htmlWebpackPlugin } from './configs/html-webpack-plugin'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import * as fs                    from 'fs-extra';
+import HtmlWebpackPlugin          from 'html-webpack-plugin';
+import * as path                  from 'path';
+import * as webpack               from 'webpack';
+import config                     from '../config';
+import lodashPlugin               from './configs/lodash';
+import { sassLoader, scssLoader } from './configs/sass';
 
-if (config.isInitialized !== true) {
-  initialize()
-}
+const SIZE_14KB = 14336;
+
+// See https://github.com/vuejs/vue-loader/issues/678#issuecomment-370965224
+const babelrc = fs.readJsonSync(path.join(__dirname, '../../.babelrc'));
+
 
 const devConfig: webpack.Configuration = {
+
+  mode: 'development',
 
   devtool: 'source-map',
 
   context: config.absSource(''),
 
-  entry: entries,
+  entry: {
+    index: ['./polyfills', './index'],
+  },
 
   resolve: {
-    extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-    mainFields: ['webpack', 'jsnext:main', 'browser', 'web', 'browserify', ['jam', 'main'], 'main'],
+    extensions : ['.tsx', '.ts', '.jsx', '.es6', '.js', '.json'],
+    mainFields : ['webpack', 'jsnext:main', 'module', 'browser', 'web', 'browserify', 'main'],
+    unsafeCache: false,
   },
 
   output: {
-    path: config.absBuilding(''),
-    publicPath: '/',
-    filename: '[name].js',
-    chunkFilename: '[id]-[name].chunk.js',
+    path         : config.absOutput(),
+    publicPath   : '',
+    filename     : '[name].js',
+    chunkFilename: '[name].chunk.js',
+    globalObject : 'self',
   },
 
   module: {
     rules: [
       {
         enforce: 'pre',
-        test: /\.[jt]sx?$/,
-        use: ['source-map-loader'],
-        exclude: /node_modules/,
-      },
-      {
-        enforce: 'pre',
-        test: /\.tsx?$/,
-        use: ['tslint-loader'],
-        exclude: /node_modules/,
-      },
-      {
-        enforce: 'pre',
-        test: /\.jsx?$/,
-        use: ['eslint-loader'],
-        exclude: /node_modules/,
-      },
-      {
-        test: /\.tsx?$/,
-        exclude: /node_modules/,
-        use: [
-          'awesome-typescript-loader',
+        test   : /\.[jt]sx?$/,
+        use    : ['source-map-loader'],
+        include: [
+          config.absSource(),
         ],
       },
       {
-        test: /\.jsx?$/,
+        enforce: 'pre',
+        test   : /\.tsx?$/,
+        use    : ['tslint-loader'],
+        include: [
+          config.absSource(),
+        ],
+      },
+      {
+        test   : /\.html$/,
         exclude: /node_modules/,
-        use: ['babel-loader?cacheDirectory'],
+        use    : ['html-loader?interpolate'],
+      },
+      {
+        test: /\.tsx?$/,
+        use : [
+          {
+            loader : 'babel-loader',
+            options: babelrc,
+          },
+          {
+            loader : 'ts-loader',
+            options: {
+              transpileOnly: true,
+              configFile   : config.absRoot('tsconfig.json'),
+            },
+          },
+        ],
+      },
+      {
+        test : /\.jsx?$/,
+        oneOf: [
+          {
+            test: /\/esm\/.*\.js$/,
+            use : [
+              {
+                loader : 'babel-loader',
+                options: babelrc,
+              },
+            ],
+          },
+          {
+            include: [
+              config.absSource(),
+            ],
+            use    : [
+              {
+                loader : 'babel-loader',
+                options: babelrc,
+              },
+            ],
+          },
+        ],
       },
       {
         test: /\.css$/,
-        use: [
+        use : [
           'style-loader',
-          'css-loader?sourceMap&camelCase',
+          {
+            loader : 'css-loader',
+            options: {
+              modules      : 'global',
+              sourceMap    : true,
+              importLoaders: 1,
+            },
+          },
+          'postcss-loader?sourceMap',
         ],
       },
       {
-        test: /\.less/,
-        use: [
+        test: /\.sass$/,
+        use : [
           'style-loader',
-          'css-loader?sourceMap&camelCase&importLoaders=1',
-          'less-loader?sourceMap&noIeCompat',
+          {
+            loader : 'css-loader',
+            options: {
+              modules      : 'global',
+              sourceMap    : true,
+              importLoaders: 3,
+            },
+          },
+          'postcss-loader?sourceMap',
+          'resolve-url-loader?sourceMap',
+          sassLoader,
         ],
       },
       {
-        test: /\.(png|jpe?g|gif|svg|woff2?|ttf|eot|ico)(\?\S*)?$/,
-        exclude: /(weixin|qr-)/,
-        use: ['url-loader'],
+        test: /\.scss$/,
+        use : [
+          'style-loader',
+          {
+            loader : 'css-loader',
+            options: {
+              modules      : 'global',
+              sourceMap    : true,
+              importLoaders: 3,
+            },
+          },
+          'postcss-loader?sourceMap',
+          'resolve-url-loader?sourceMap',
+          scssLoader,
+        ],
       },
       {
-        test: /(weixin|qr-).*\.(png|jpe?g|gif|svg|woff2?|ttf|eot|ico)(\?\S*)?$/,
-        use: ['file-loader'],
+        test   : /\.(png|jpe?g|gif|svg|woff2?|ttf|eot|ico)(\?\S*)?$/,
+        exclude: /weixin/,
+        use    : [
+          {
+            loader : 'url-loader',
+            options: {
+              limit   : SIZE_14KB,
+              name    : '[name].[ext]',
+              fallback: 'file-loader',
+            },
+          },
+        ],
+      },
+      {
+        test: /weixin.*\.(png|jpe?g|gif|svg|woff2?|ttf|eot|ico)(\?\S*)?$/,
+        use : [
+          {
+            loader : 'file-loader',
+            options: {
+              name: '[name].[ext]',
+            },
+          },
+        ],
       },
     ],
   },
 
+  stats: {
+    // See: https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+    warningsFilter: /export .* was not found in/,
+  },
+
+  node: {
+    __dirname : true,
+    __filename: true,
+  },
+
   plugins: [
     // Refer to: https://github.com/lodash/lodash-webpack-plugin
-    new LodashPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        VUE_ROUTER_BASE: JSON.stringify(process.env.VUE_ROUTER_BASE),
-      },
+    lodashPlugin,
+    new ForkTsCheckerWebpackPlugin({
+      tsconfig: config.absRoot('tsconfig.json'),
     }),
-    new webpack.optimize.CommonsChunkPlugin({
-      names: ['index', 'vendor', 'polyfills'],
+    new HtmlWebpackPlugin({
+      filename      : 'index.html',
+      template      : './index.html',
+      hash          : false,
+      minify        : false,
+      inject        : 'body',
+      chunksSortMode: 'auto',
     }),
-    htmlWebpackPlugin,
   ],
+};
 
-  performance: {
-    hints: false,
-  },
-}
-
-export default devConfig
+export default devConfig;

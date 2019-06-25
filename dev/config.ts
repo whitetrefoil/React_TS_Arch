@@ -1,81 +1,65 @@
-import * as chalk from 'chalk'
-import * as meow from 'meow'
-import * as path from 'path'
-import { getLogger } from './utils/log'
+import Chalk from 'chalk';
+import log   from 'fancy-log';
+import meow  from 'meow';
+import path  from 'path';
 
 // region - Interfaces
 
 interface IFlags {
-  development: boolean
-  port: string
-  prefix: string
-  index: string
-  livereload: string
-  ping: string
-  backend: string
+  help: boolean;
+  version: boolean;
+  development: boolean;
+  port: string;
+  ping: string;
+  backend: string;
 }
 
-interface IMeowResult extends meow.Result {
-  flags: IFlags
-}
+type IBuildPathFn = (...path: string[]) => string;
 
 interface IConfig {
-  isInitialized: boolean
-  argv?: IMeowResult
-  pkg?: any
-  serverPort?: number
-  apiPrefixes?: string[]
-  serverIndex?: string
-  livereloadHost?: string
-  ping?: number
-  backendDest?: string
+  argv: meow.Result<IFlags>;
+  pkg: any;
+  serverPort: number;
+  apiPrefixes: string[];
+  ping: number;
+  backendDest: string;
 
-  root?(...pathInRoot: string[]): string
-
-  absRoot?(...pathInRoot: string[]): string
-
-  source?(...pathInSource: string[]): string
-
-  absSource?(...pathInSource: string[]): string
-
-  building?(...pathInBuilding: string[]): string
-
-  absBuilding?(...pathInBuilding: string[]): string
-
-  output?(...pathInOutput: string[]): string
-
-  absOutput?(...pathInOutput: string[]): string
-
-  outputByEnv?(...pathInOutput: string[]): string
-
-  absOutputByEnv?(...pathInOutput: string[]): string
+  root: IBuildPathFn;
+  absRoot: IBuildPathFn;
+  source: IBuildPathFn;
+  absSource: IBuildPathFn;
+  building: IBuildPathFn;
+  absBuilding: IBuildPathFn;
+  output: IBuildPathFn;
+  absOutput: IBuildPathFn;
+  outputByEnv: IBuildPathFn;
+  absOutputByEnv: IBuildPathFn;
 }
 
 // endregion
 
 // region - Default constants
 
-const DEFAULT_IS_DEVELOPMENT = false
-const DEFAULT_PORT = 8888
-const DEFAULT_PREFIX = '/Channel/,/data/,/crm/'
-const DEFAULT_INDEX = 'index.html'
-const DEFAULT_PING = 0
-const DEFAULT_LIVERELOAD = 'localhost'
-const DEFAULT_BACKEND = 'http://localhost:8091'
-const DEFAULT_BACKEND_HTTPS = false
+const DEFAULT_IS_DEVELOPMENT = false;
+const DEFAULT_PORT           = 8888;
+const DEFAULT_PREFIX         = ['/api/'];
+const DEFAULT_PING           = 0;
+const DEFAULT_BACKEND        = 'http://localhost:8091';
 
-const DEFAULT_BUILDING_DIR = '.building'
-const DEFAULT_OUTPUT_DIR = 'dist'
-const DEFAULT_SOURCE_BASE_DIR = 'src'
+const DEFAULT_BUILDING_DIR    = '.building';
+const DEFAULT_OUTPUT_DIR      = 'dist';
+const DEFAULT_SOURCE_BASE_DIR = 'src';
 
 // endregion
 
-const logger = getLogger(__filename)
+const { blue, green, gray, yellow } = Chalk;
+
+// region - Configure Meow
 
 const argv = meow(
   `
     Usage:
-      $ npm ${chalk.yellow('<task>')} -- ${chalk.yellow('<options>')}
+      $ npm ${yellow('<task>')} -- ${yellow('<options>')}
 
     Tasks:
       run server           start preview server
@@ -84,124 +68,86 @@ const argv = meow(
       run coverage         generate coverage report
       run build            build the source code
 
-    Options:                                                     [${chalk.gray('default value')}]
+    Options:                                                     [${gray('default value')}]
       common:
         -h, --help         show this help message
-        -d, --development  set NODE_ENV to "development"         [${chalk.yellow('false')}]
+        -v, --version      show version
+        -d, --development  set NODE_ENV to "development"         [${yellow('false')}]
       developing:
-        -p, --port         port of preview server                [${chalk.blue('8888')}]
-        -x, --prefix       prefix to determine backend requests  [${chalk.green('"/Channel/,/data/,/crm/"')}]
-                           can use ',' to specify multiple ones
-        -i, --index        index page of preview server          [${chalk.green('"index.html"')}]
-        -l, --livereload   the hostname in livereload script     [${chalk.green('"localhost"')}]
-        --ping             emulate the network delay (ms)        [${chalk.blue('0')}]
-        -e, --backend      start the server in integration mode  [${chalk.green('"http://localhost:8091"')}]
+        -p, --port         port of preview server                [${blue('8888')}]
+        --ping             emulate the network delay (ms)        [${blue('0')}]
+        -e, --backend      start the server in integration mode  [${green('"http://localhost:8091"')}]
                            can specify the destination
 
     For more detail of tasks / options, see code in "dev/gulp" directory.
   `,
   {
-    boolean: ['help', 'development'],
-    string: ['index', 'prefix', 'livereload', 'ping', 'backend'],
-    alias: {
-      h: 'help',
-      d: 'development',
-      p: 'port',
-      x: 'prefix',
-      i: 'index',
-      l: 'livereload',
-      e: 'backend',
-    },
-    default: {
-      development: DEFAULT_IS_DEVELOPMENT,
-      port: DEFAULT_PORT,
-      prefix: DEFAULT_PREFIX,
-      index: DEFAULT_INDEX,
-      livereload: DEFAULT_LIVERELOAD,
-      ping: DEFAULT_PING,
+    flags: {
+      help       : { alias: 'h', type: 'boolean' },
+      version    : { alias: 'v', type: 'boolean' },
+      development: { alias: 'd', type: 'boolean', default: DEFAULT_IS_DEVELOPMENT },
+      port       : { alias: 'p', default: DEFAULT_PORT },
+      ping       : { default: DEFAULT_PING },
+      backend    : { alias: 'e', type: 'string', default: DEFAULT_BACKEND },
     },
   },
-) as IMeowResult
+);
 
-export class ConfigNotInitializedError extends Error {
-  isConfigNotInitializedError = true
-}
+// endregion
 
-const root = path.join(__dirname, '..')
-const source = DEFAULT_SOURCE_BASE_DIR
-const building = DEFAULT_BUILDING_DIR
-const output = DEFAULT_OUTPUT_DIR
+// region - Main exports
 
-export const config: IConfig = {
-  isInitialized: false,
-}
+const rootDir     = path.join(__dirname, '..');
+const sourceDir   = DEFAULT_SOURCE_BASE_DIR;
+const buildingDir = DEFAULT_BUILDING_DIR;
+const outputDir   = DEFAULT_OUTPUT_DIR;
 
-config.root = (...pathInRoot) =>
-  path.join(root, ...pathInRoot)
+process.env.NODE_ENV        = (argv.flags.development || DEFAULT_IS_DEVELOPMENT) ? 'development' : 'production';
+process.env.BABEL_ENV       = process.env.NODE_ENV;
 
-config.absRoot = config.root
+log(`Initializing project in "${rootDir}" for ${process.env.NODE_ENV} environment.`);
 
-config.source = (...pathInSource) =>
-  path.join(source, ...pathInSource)
+const root: IBuildPathFn = (...pathInRoot) => path.join(rootDir, ...pathInRoot);
+const absRoot            = root;
 
-config.absSource = (...pathInSource) =>
-  config.root(source, ...pathInSource)
+const source: IBuildPathFn    = (...pathInSource) => path.join(sourceDir, ...pathInSource);
+const absSource: IBuildPathFn = (...pathInSource) => root(sourceDir, ...pathInSource);
 
-config.building = (...pathInBuilding) =>
-  path.join(building, ...pathInBuilding)
+const building: IBuildPathFn    = (...pathInBuilding) => path.join(buildingDir, ...pathInBuilding);
+const absBuilding: IBuildPathFn = (...pathInBuilding) => root(buildingDir, ...pathInBuilding);
 
-config.absBuilding = (...pathInBuilding) =>
-  config.root(building, ...pathInBuilding)
+const output: IBuildPathFn    = (...pathInOutput) => path.join(outputDir, ...pathInOutput);
+const absOutput: IBuildPathFn = (...pathInOutput) => root(outputDir, ...pathInOutput);
 
-config.output = (...pathInOutput) =>
-  path.join(output, ...pathInOutput)
+const outputByEnv: IBuildPathFn = (...pathInOutput) => {
+  const dir = process.env.NODE_ENV === 'development' ? buildingDir : outputDir;
+  return path.join(dir, ...pathInOutput);
+};
 
-config.absOutput = (...pathInOutput) =>
-  config.root(output, ...pathInOutput)
+const absOutputByEnv: IBuildPathFn = (...pathInOutput) => {
+  const dir = process.env.NODE_ENV === 'development' ? buildingDir : outputDir;
+  return root(dir, ...pathInOutput);
+};
 
-config.outputByEnv = (...pathInOutput) => {
-  const dir = process.env.NODE_ENV === 'production' ? output : building
-  return path.join(dir, ...pathInOutput)
-}
+const config: IConfig = {
+  argv,
+  pkg        : argv.pkg || {},
+  serverPort : parseInt(argv.flags.port, 10),
+  apiPrefixes: DEFAULT_PREFIX,
+  ping       : parseInt(argv.flags.ping, 10),
+  backendDest: argv.flags.backend === '' ? DEFAULT_BACKEND : argv.flags.backend,
+  root,
+  absRoot,
+  source,
+  absSource,
+  building,
+  absBuilding,
+  output,
+  absOutput,
+  outputByEnv,
+  absOutputByEnv,
+};
 
-config.absOutputByEnv = (...pathInOutput) => {
-  const dir = process.env.NODE_ENV === 'production' ? output : building
-  return config.root(dir, ...pathInOutput)
-}
+// endregion
 
-export function initialize() {
-
-  if (config.isInitialized) {
-    // tslint:disable-next-line:no-console
-    logger.warn(`Project has already been initialized.  Newer settings will be ignored.`)
-    return
-  }
-
-  config.argv = argv
-
-  config.pkg = argv.pkg || {}
-
-  if (typeof process.env.NODE_ENV !== 'string') {
-    process.env.NODE_ENV = (argv.flags.development || DEFAULT_IS_DEVELOPMENT)
-      ? 'development' : 'production'
-  }
-  process.env.BABEL_ENV = process.env.NODE_ENV
-
-  logger.log(`Initializing project in "${root}"`)
-
-  logger.log(`Running under "${process.env.NODE_ENV}" environment.`)
-
-  config.serverPort = parseInt(argv.flags.port, 10)
-
-  config.apiPrefixes = argv.flags.prefix.split(',')
-
-  config.serverIndex = argv.flags.index
-
-  config.livereloadHost = argv.flags.livereload
-
-  config.ping = parseInt(argv.flags.ping, 10)
-
-  config.backendDest = argv.flags.backend === '' ? DEFAULT_BACKEND : argv.flags.backend
-
-  config.isInitialized = true
-}
+export default config;

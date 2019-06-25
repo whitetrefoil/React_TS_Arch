@@ -1,48 +1,26 @@
-import Layout from 'antd/lib/layout'
-import React from 'react'
-import { HashRouter as Router, Route } from 'react-router-dom'
-import asyncComponent from '../helpers/async-component'
-import * as c from './App.less'
-import { AppHeader } from './AppHeader'
-import { Generator } from './Generator'
+import React                    from 'react';
+import { BrowserRouter, Route } from 'react-router-dom';
+import './App.scss';
 
-const { Header, Content, Footer } = Layout
-const About = asyncComponent(() => import(/* webpackChunkName: "about" */'./About'))
+
+const Hello = React.lazy(() => import(/*webpackChunkName:"|components|Hello"*/'./Hello'));
+
 
 interface AppState {
-  selectedKeys: string[]
 }
 
 export class App extends React.Component {
-  state: AppState
-
-  constructor(props: any) {
-    super(props)
-    this.state = {
-      selectedKeys: [],
-    }
-  }
-
-  render() {
+  render(): React.ReactNode {
     return (
-      <Router>
-        <Layout>
-          <Route component={AppHeader}/>
+      <div id="app" className="app-loaded container">
+        <h1 className="h1">[Component] MyApp</h1>
 
-          <Content className={c.appContent}>
-            <div className={c.appContentPanel}>
-              <Route exact path="/" component={Generator}/>
-              <Route exact path="/about" component={About}/>
-            </div>
-          </Content>
-
-          <Footer className={c.appFooter}>
-            Powered by World
-          </Footer>
-        </Layout>
-      </Router>
-    )
+        <BrowserRouter>
+          <Route path="/" component={Hello}/>
+        </BrowserRouter>
+      </div>
+    );
   }
 }
 
-export default App
+export default App;

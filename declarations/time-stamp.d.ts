@@ -1,7 +1,7 @@
 declare module 'time-stamp' {
-  function t(pattern?: string): string
+  function t(pattern?: string): string;
 
   namespace t {}
 
-  export = t
+  export = t;
 }

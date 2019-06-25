@@ -1,1 +1,1 @@
-type Noop = () => void
+type Noop = () => void;
