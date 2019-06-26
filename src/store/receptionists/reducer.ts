@@ -25,12 +25,14 @@ export const reducer = createReducer(state)
   .handleAction(fetchReceptionistAsync.request, (s, a) => ({
     ...s,
     loading: true,
+    failure: undefined,
   }))
 
   .handleAction(fetchReceptionistAsync.success, (s, a) => ({
     ...s,
     initialized : true,
     loading     : false,
+    failure     : undefined,
     receptionist: a.payload,
   }))
 

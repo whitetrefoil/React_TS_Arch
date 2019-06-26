@@ -5,7 +5,7 @@ interface Props {
   name: string;
 }
 
-export const Shared: React.FunctionComponentFactory<Props> = props =>
+export const Shared: React.FC<Props> = props =>
   <div className={`shared ${css.shared}`}>
     <h1 className="h1">[Component] Shared</h1>
 

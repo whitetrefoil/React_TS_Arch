@@ -1,4 +1,4 @@
-import React           from 'react';
+import * as React      from 'react';
 import { PageLoading } from './components/shared/PageLoading';
 import { getLogger }   from './services/log';
 
@@ -11,7 +11,7 @@ async function bootstrap() {
   const ReactDOM     = await import(/*webpackChunkName:"react-dom"*/'react-dom');
   const { Provider } = await import(/*webpackChunkName:"react-redux"*/'react-redux');
   const store        = await import(/*webpackChunkName:"|store"*/'./store').then(m => m.default);
-  const App          = React.lazy(() => import(/*webpackChunkName:"|components|App"*/'./components/App'));
+  const App          = React.lazy(() => import(/*webpackChunkName:"|c|App"*/'./components/App'));
 
   ReactDOM.render(
     <Provider store={store}>
