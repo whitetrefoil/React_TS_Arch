@@ -1,5 +1,5 @@
 import * as React                                from 'react';
-import { useEffect, useRef }                     from 'react';
+import { useDebugValue, useEffect, useRef }      from 'react';
 import { connect }                               from 'react-redux';
 import { Route }                                 from 'react-router-dom';
 import { getGreeting }                           from '../../store/receptionists/selector';
@@ -29,6 +29,7 @@ type Needed = MappedState&MappedDispatches&Props;
 
 const useRenderCounter = () => {
   const rendered = useRef(0);
+  useDebugValue(rendered.current);
   rendered.current += 1;
   return rendered.current;
 };
