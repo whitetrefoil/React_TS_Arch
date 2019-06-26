@@ -1,5 +1,5 @@
 import * as React                                from 'react';
-import { useEffect }                             from 'react';
+import { useEffect, useRef }                     from 'react';
 import { connect }                               from 'react-redux';
 import { Route }                                 from 'react-router-dom';
 import { getGreeting }                           from '../../store/receptionists/selector';
@@ -27,11 +27,20 @@ interface Props {}
 type Needed = MappedState&MappedDispatches&Props;
 
 
+const useRenderCounter = () => {
+  const rendered = useRef(0);
+  rendered.current += 1;
+  return rendered.current;
+};
+
+
 const Hello: React.FC<Needed> = props => {
 
   useEffect(() => {
     props.init();
   }, []);
+
+  const rendered = useRenderCounter();
 
   return (
     <div className={`hello ${css.hello}`}>
@@ -40,6 +49,8 @@ const Hello: React.FC<Needed> = props => {
       <h3 className="h3">Hello!!!</h3>
 
       <p>{props.greeting}</p>
+
+      <p>This page has been rendered {rendered} times.</p>
 
       <p>
         <button
