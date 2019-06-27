@@ -10,7 +10,7 @@ interface AppState {
 }
 
 export const App: React.FC = () =>
-  <div id="app" className="app-loaded container">
+  <div className="container">
     <h1 className="h1">[Component] MyApp</h1>
 
     <BrowserRouter>
